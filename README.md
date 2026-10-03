@@ -28,6 +28,6 @@ Criação das tabelas:
 - `hotels`
 - `rooms`
 - `reserves`
-- `reservation_payments`
-- `reservation_dailies`
+- `payments`
+- `dailies`
 - `guests`
