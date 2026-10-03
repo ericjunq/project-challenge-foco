@@ -4,7 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ReservationPayment extends Model
+class Payment extends Model
 {
     protected $fillable = ['reserve_id', 'method', 'value'];
+
+    public function reserve(): BelongsTo {
+        return $this->belongsTo(Reserve::class);
+    }
 }
