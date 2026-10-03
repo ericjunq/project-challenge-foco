@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('guests', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('reserve_id')->constrained()->onDelete('cascade');
+            $table->string('name', 100);
+            $table->string('last_name', 100);
+            $table->string('phone', 15);
             $table->timestamps();
         });
     }

@@ -11,9 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reservation_dailies', function (Blueprint $table) {
+        Schema::create('dailies', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('reserve_id')->constrained()->onDelete('cascade');
+            $table->date('date');
+            $table->decimal('value');
             $table->timestamps();
+
+            $table->unique(['reserve_id', 'date']);
         });
     }
 
@@ -22,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reservation_dailies');
+        Schema::dropIfExists('dailies');
     }
 };
