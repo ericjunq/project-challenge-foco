@@ -8,4 +8,6 @@ use Illumante\Database\Eloquent\Factories\HasFactories;
 class Room extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['hotel_id', 'name'];
 }
