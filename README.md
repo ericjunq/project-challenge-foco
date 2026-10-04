@@ -31,3 +31,16 @@ Criação das tabelas:
 - `payments`
 - `dailies`
 - `guests`
+
+## Importação de arquivos XML
+
+Os arquivos XML de origem estão armazenados em `database/xml/` e simulam os dados de uma API.
+
+Para fazer o import dos arquivos: `php artisan xml:import`
+
+- Lê `hotels.xml`, `rooms.xml` e `reserves.xml`, nesta ordem, pois quartos dependem de hotéis e reservas dependem de hotéis e quartos.
+- O comando pode ser executado várias vezes sem duplicar dados: usa o `external_id` como chave no `updateOrCreate`.
+- Reservas são ignoradas, com um aviso, quando o hotel ou o quarto não existem, quando o quarto não pertence ao hotel informado, ou quando o check-out é igual ou anterior ao check-in.
+- Guests, dailies e payments são recriados a cada execução.
+- Cada reserva é gravada dentro de uma transaction, com rollback em caso de falha.
+- Dailies fora do período de estadia (como na reserva 6) geram avisos, mas continuam sendo importadas, para manter os dados financeiros do sistema de origem.
