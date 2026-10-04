@@ -50,3 +50,23 @@ Para fazer o import dos arquivos: `php artisan xml:import`
 O comando `xml:import` foi agendado no Scheduler do Laravel (`routes/console.php`) para rodar uma vez por dia.
 Em servidores de produção, basta apenas uma entrada de cron no servidor, que chama o Scheduler a cada minuto: \* \* \* \* \* cd /caminho/do/projeto && php artisan schedule:run >> /dev/null 2>&1
 Em desenvolvimento: `php artisan schedule:work`. Para listar o que está agendado: `php artisan schedule:list`.
+
+## API de quartos
+
+| Verbo     | Rota              | Descrição                | Resposta      |
+| --------- | ----------------- | ------------------------ | ------------- |
+| GET       | `/api/rooms`      | Lista quartos (paginado) | 200           |
+| GET       | `/api/rooms/{id}` | Mostra um quarto         | 200, 404      |
+| POST      | `/api/rooms`      | Cria um quarto           | 201, 422      |
+| PUT/PATCH | `/api/rooms/{id}` | Atualiza um quarto       | 200, 404, 422 |
+| DELETE    | `/api/rooms/{id}` | Remove um quarto         | 204, 404, 409 |
+
+Um quarto com reservas não pode ser removido (409), porque as reservas dependem dele.
+
+Exemplo:
+
+    POST /api/rooms
+    {"hotel_id": 1, "name": "Suíte Master"}
+
+    201 Created
+    {"data": {"id": 7, "hotel_id": 1, "name": "Suíte Master"}}
