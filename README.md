@@ -44,3 +44,9 @@ Para fazer o import dos arquivos: `php artisan xml:import`
 - Reservas importadas são mantidas pelo XML: hóspedes, dailies e pagamentos são recriados a cada execução, então alterações feitas diretamente no banco ou pela API nesses registros são sobrescritas na próxima importação.
 - Cada reserva é gravada dentro de uma transaction, com rollback em caso de falha.
 - Dailies fora do período de estadia (como na reserva 6) geram avisos, mas continuam sendo importadas, para manter os dados financeiros do sistema de origem.
+
+## Comando CRON
+
+O comando `xml:import` foi agendado no Scheduler do Laravel (`routes/console.php`) para rodar uma vez por dia.
+Em servidores de produção, basta apenas uma entrada de cron no servidor, que chama o Scheduler a cada minuto: \* \* \* \* \* cd /caminho/do/projeto && php artisan schedule:run >> /dev/null 2>&1
+Em desenvolvimento: `php artisan schedule:work`. Para listar o que está agendado: `php artisan schedule:list`.
