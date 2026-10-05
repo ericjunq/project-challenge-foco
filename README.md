@@ -70,3 +70,36 @@ Exemplo:
 
     201 Created
     {"data": {"id": 7, "hotel_id": 1, "name": "Suíte Master"}}
+
+## API de reservas
+
+| Verbo | Rota            | Descrição                                           | Resposta |
+| ----- | --------------- | --------------------------------------------------- | -------- |
+| POST  | `/api/reserves` | Cria uma reserva com hóspedes, dailies e pagamentos | 201, 422 |
+
+Regras:
+
+- O hotel é derivado do quarto informado (`room_id`).
+- O `total` é calculado pelo servidor, somando as dailies.
+- As dailies devem cobrir cada noite da estadia, uma por data, do check-in até a véspera do check-out.
+- Hóspedes são obrigatórios (ao menos um); pagamentos são opcionais.
+- A reserva e as filhas são gravadas numa transaction: se algo falha, nada é gravado.
+
+Exemplo:
+
+    POST /api/reserves
+    {
+      "room_id": 1,
+      "check_in": "2026-12-01",
+      "check_out": "2026-12-04",
+      "guests": [{"name": "Maria", "last_name": "Silva", "phone": "11999999999"}],
+      "dailies": [
+        {"date": "2026-12-01", "value": 100},
+        {"date": "2026-12-02", "value": 100},
+        {"date": "2026-12-03", "value": 100}
+      ],
+      "payments": [{"method": 1, "value": 100}]
+    }
+
+    201 Created
+    {"data": {"id": 7, "hotel_id": 1, "room_id": 1, "total": "300.00", ...}}
