@@ -14,7 +14,7 @@ API REST em Laravel para gestão de hotéis, quartos e reservas, com importaçã
 1. Clone o repositório e instale as dependências:
 
 ```bash
-   git clone <url-do-repositorio>
+   git clone https://github.com/ericjunq/project-challenge-foco
    cd project-challenge
    composer install
    cp .env.example .env
