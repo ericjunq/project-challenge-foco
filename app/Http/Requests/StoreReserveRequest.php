@@ -30,7 +30,7 @@ class StoreReserveRequest extends FormRequest
             'guests' => ['required', 'array', 'min:1'],
             'guests.*.name' => ['required', 'string', 'max:100'],
             'guests.*.last_name' => ['required', 'string', 'max:100'],
-            'guests.*.phone' => ['nullable', 'string', 'max:15'],
+            'guests.*.phone' => ['required', 'string', 'max:15'],
 
             'dailies' => ['required', 'array', 'min:1'],
             'dailies.*.date' => ['required', 'date_format:Y-m-d'],
