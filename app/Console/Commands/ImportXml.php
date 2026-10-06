@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 #[Signature('xml:import')]
 #[Description('Importação hotéis, quartos e reservas dos XMLs em database/xml')]
@@ -27,12 +28,19 @@ class ImportXml extends Command
         return self::SUCCESS;
     }
 
+    private function report(string $message, array $context = []): void
+    {
+        $this->warn($message);
+        Log::channel('import')->warning($message, $context);
+    }
+
     private function importHotels(): void
     {
         $path = database_path('xml/hotels.xml');
 
         if (!file_exists($path)) {
             $this->error("Arquivo não encontrado: {$path}");
+            Log::channel('import')->error("Arquivo não encontrado: {$path}");
             return;
         }
 
@@ -54,6 +62,7 @@ class ImportXml extends Command
 
         if (!file_exists($path)) {
             $this->error("Arquivo não encontrado: {$path}");
+            Log::channel('import')->error("Arquivo não encontrado: {$path}");
             return;
         }
 
@@ -63,7 +72,7 @@ class ImportXml extends Command
             $hotel = Hotel::where('external_id', (int) $item['hotelCode'])->first();
 
             if (!$hotel) {
-                $this->warn("Quarto {$item['id']} ignorado: hotel {$item['hotelCode']} não encontrado.");
+                $this->report("Quarto {$item['id']} ignorado: hotel {$item['hotelCode']} não encontrado.");
                 continue;
             }
 
@@ -84,7 +93,7 @@ class ImportXml extends Command
         $path = database_path('xml/reserves.xml');
 
         if (!file_exists($path)) {
-            $this->warn("Arquivo não encontrado: {$path}");
+            Log::channel('import')->error("Arquivo não encontrado: {$path}");
             return;
         }
 
@@ -98,12 +107,12 @@ class ImportXml extends Command
             $room = Room::where('external_id', (int) $item['roomCode'])->first();
 
             if (!$hotel || !$room) {
-                $this->warn("Reserva {$externalId} ignorada. \nMotivo: hotel ou quarto não encontrados");
+                $this->report("Reserva {$externalId} ignorada. \nMotivo: hotel ou quarto não encontrados");
                 continue;
             }
 
             if ($room->hotel_id !== $hotel->id) {
-                $this->warn("Reserva {$externalId} ignorada. \nMotivo: o quarto não pertence ao hotel informado");
+                $this->report("Reserva {$externalId} ignorada. \nMotivo: o quarto não pertence ao hotel informado");
                 continue;
             }
 
@@ -111,7 +120,7 @@ class ImportXml extends Command
             $checkOut = (string) $item->CheckOut;
 
             if ($checkOut <= $checkIn) {
-                $this->warn("Reserva {$externalId} ignorada. \nMotivo: o check-out é igual ou anterior ao check-in");
+                $this->report("Reserva {$externalId} ignorada. \nMotivo: o check-out é igual ou anterior ao check-in");
                 continue;
             }
 
@@ -144,7 +153,7 @@ class ImportXml extends Command
                         $date = (string) $daily->Date;
 
                         if ($date < $checkIn || $date >= $checkOut) {
-                            $this->warn("Reserva {$externalId}: daily {$date} fora do período de estadia");
+                            $this->report("Reserva {$externalId}: daily {$date} fora do período de estadia");
                         }
 
                         $reserve->dailies()->create([
@@ -164,7 +173,8 @@ class ImportXml extends Command
 
                 });
             } catch (\Throwable $e) {
-                $this->error("Falha na reserva {$externalId} \n {$e->getMessage()}");
+                $this->error("Falha na reserva {$externalId}: {$e->getMessage()}");
+                Log::channel('import')->error("Falha na reserva {$externalId}", ['erro' => $e->getMessage()]);
             }
         }
 
