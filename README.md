@@ -366,7 +366,7 @@ Depois, para rodar todos os testes:
 php artisan test
 ```
 
-Cobertura atual (25 testes):
+Cobertura atual (23 testes):
 
 - **Criação de reserva:** sucesso com total calculado e validações (dailies que não cobrem a estadia, data repetida, check-out anterior ao check-in, hóspede sem telefone, sem hóspedes, quarto inexistente). Nas falhas, os testes confirmam que nada é gravado.
 - **Conflito de períodos:** reserva repetida e períodos sobrepostos são recusados (409); reserva que começa no dia do check-out anterior e mesmo período em quartos diferentes são aceitos.
