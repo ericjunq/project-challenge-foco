@@ -8,6 +8,7 @@ use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomRequest;
 use App\Http\Resources\RoomResource;
 use App\Models\Room;
+use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller
 {
@@ -25,6 +26,8 @@ class RoomController extends Controller
     public function store(StoreRoomRequest $request)
     {
         $room = Room::create($request->validated());
+
+        Log::info('Quarto criado', ['room_id' => $room->id, 'hotel_id' => $room->hotel_id]);
 
         return new RoomResource($room);
     }
@@ -44,6 +47,8 @@ class RoomController extends Controller
     {
         $room->update($request->validated());
 
+        Log::warning('Remoção de quarto recusada: possui reservas', ['room_id' => $room->id]);
+
         return new RoomResource($room);
     }
     /**
@@ -61,6 +66,8 @@ class RoomController extends Controller
         }
 
         $room->delete();
+
+        Log::info('Quarto removido', ['room_id' => $room->id]);
 
         return response()->noContent();
     }
