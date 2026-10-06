@@ -47,7 +47,7 @@ class RoomController extends Controller
     {
         $room->update($request->validated());
 
-        Log::warning('Remoção de quarto recusada: possui reservas', ['room_id' => $room->id]);
+        Log::info('Quarto atualizado', ['room_id' => $room->id]);
 
         return new RoomResource($room);
     }
