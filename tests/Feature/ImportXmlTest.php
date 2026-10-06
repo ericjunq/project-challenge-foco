@@ -9,6 +9,7 @@ class ImportXmlTest extends TestCase
 {
     use RefreshDatabase;
 
+
     public function test_importa_os_xmls_para_o_banco(): void
     {
         $this->artisan('xml:import')->assertSuccessful();
