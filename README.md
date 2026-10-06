@@ -349,3 +349,10 @@ Cobertura atual:
 - **Criação de reserva:** sucesso com total calculado e validações (dailies que não cobrem a estadia, data repetida, check-out anterior ao check-in, hóspede sem telefone, sem hóspedes, quarto inexistente). Nas falhas, os testes confirmam que nada é gravado.
 - **Importação dos XMLs:** dados importados e execução repetida sem duplicar.
 - **CRUD de quartos:** listar, mostrar, criar, atualizar e remover, incluindo a recusa (409) de remover um quarto com reservas.
+
+## Logs
+
+- `storage/logs/laravel.log`: eventos da API (reserva criada, quartos criados, atualizados e removidos, recusas por regra de negócio) e as exceções não tratadas.
+- `storage/logs/import-AAAA-MM-DD.log`: execuções do `xml:import` (início, fim, avisos e falhas). Mantém os últimos 14 dias.
+
+Os logs registram apenas ids e valores de negócio, nunca dados pessoais dos hóspedes.
