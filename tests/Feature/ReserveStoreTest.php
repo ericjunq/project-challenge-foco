@@ -159,4 +159,66 @@ class ReserveStoreTest extends TestCase
         $this->assertDatabaseCount('reserves', 1);
         $this->assertDatabaseCount('payments', 0);
     }
+
+    public function test_rejeitar_reserva_identica_no_mesmo_quarto(): void
+    {
+        $room = Room::factory()->create();
+
+        $this->postJson('/api/reserves', $this->payload($room))->assertCreated();
+
+        $this->postJson('/api/reserves', $this->payload($room))->assertConflict();
+
+        $this->assertDatabaseCount('reserves', 1);
+        $this->assertDatabaseCount('guests', 1);
+        $this->assertDatabaseCount('dailies', 3);
+    }
+
+    public function test_rejeitar_periodo_sobreposto_no_mesmo_quarto(): void
+    {
+        $room = Room::factory()->create();
+
+        $this->postJson('/api/reserves', $this->payload($room))->assertCreated();
+
+        $this->postJson('/api/reserves', $this->payload($room, [
+            'check_in' => '2026-12-03',
+            'check_out' => '2026-12-06',
+            'dailies' => [
+                ['date' => '2026-12-03', 'value' => 100],
+                ['date' => '2026-12-04', 'value' => 100],
+                ['date' => '2026-12-05', 'value' => 100],
+            ],
+        ]))->assertConflict();
+
+        $this->assertDatabaseCount('reserves', 1);
+    }
+
+    public function test_aceita_reserva_que_inicia_no_check_out_anterior(): void
+    {
+        $room = Room::factory()->create();
+
+        $this->postJson('/api/reserves', $this->payload($room))->assertCreated();
+
+        $this->postJson('/api/reserves', $this->payload($room, [
+            'check_in' => '2026-12-04',
+            'check_out' => '2026-12-06',
+            'dailies' => [
+                ['date' => '2026-12-04', 'value' => 100],
+                ['date' => '2026-12-05', 'value' => 100],
+            ],
+        ]))->assertCreated();
+
+        $this->assertDatabaseCount('reserves', 2);
+    }
+
+    public function test_aceita_mesmo_periodo_em_quartos_diferentes(): void
+    {
+        $roomA = Room::factory()->create();
+        $roomB = Room::factory()->create();
+
+        $this->postJson('/api/reserves', $this->payload($roomA))->assertCreated();
+        $this->postJson('/api/reserves', $this->payload($roomB))->assertCreated();
+
+        $this->assertDatabaseCount('reserves', 2);
+
+    }
 }
