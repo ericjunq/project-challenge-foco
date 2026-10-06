@@ -4,10 +4,12 @@ API REST em Laravel para gestão de hotéis, quartos e reservas, com importaçã
 
 ## Requisitos
 
-- PHP 8.4
+- PHP 8.4, com as extensões `pdo_mysql`, `zip` e `bcmath`
 - Composer
 - MySQL
 - Laravel (versão definida no `composer.json`)
+
+Ou, alternativamente, apenas Docker e Docker Compose (veja a seção "Docker").
 
 ## Configuração do ambiente
 
@@ -54,6 +56,34 @@ API REST em Laravel para gestão de hotéis, quartos e reservas, com importaçã
 A API fica em `http://127.0.0.1:8000/api`.
 
 As mensagens de validação estão em português (`APP_LOCALE=pt_BR`).
+
+## Docker
+
+Alternativa ao passo a passo manual acima. Requisitos: Docker e Docker Compose.
+
+```bash
+docker compose up --build
+```
+
+O container da aplicação cria o `.env`, gera a chave, roda as migrations, importa os XMLs e sobe a API em `http://localhost:8000`. O MySQL fica exposto na porta `3307` do host.
+
+O container roda com `APP_DEBUG=false`, então as respostas de erro não expõem detalhes internos da aplicação.
+
+Para rodar os testes dentro do container (usando o banco de testes, e não o da aplicação):
+
+```bash
+docker compose exec -e DB_DATABASE=foco_challenge_test app php artisan test
+```
+
+Para executar o agendador (cron) no container:
+
+```bash
+docker compose exec app php artisan schedule:work
+```
+
+Para parar: `docker compose down` (adicione `-v` para apagar também o banco).
+
+O container usa `php artisan serve`, o que simplifica a configuração; em produção, o recomendado seria Nginx com PHP-FPM.
 
 ## Banco de dados
 
@@ -324,7 +354,7 @@ Resposta (o `total` é calculado pelo servidor):
 
 ## Testes
 
-Os testes usam um banco separado (`foco_challenge_test`), configurado no `phpunit.xml`, para nunca tocar nos dados de desenvolvimento. Crie o banco antes de rodar:
+Os testes usam um banco separado (`foco_challenge_test`), configurado no `phpunit.xml` (com `force="true"`, para valer mesmo quando as variáveis de ambiente já estão definidas), para nunca tocar nos dados de desenvolvimento. Crie o banco antes de rodar:
 
 ```sql
 CREATE DATABASE foco_challenge_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -336,7 +366,7 @@ Depois, para rodar todos os testes:
 php artisan test
 ```
 
-Cobertura atual:
+Cobertura atual (25 testes):
 
 - **Criação de reserva:** sucesso com total calculado e validações (dailies que não cobrem a estadia, data repetida, check-out anterior ao check-in, hóspede sem telefone, sem hóspedes, quarto inexistente). Nas falhas, os testes confirmam que nada é gravado.
 - **Conflito de períodos:** reserva repetida e períodos sobrepostos são recusados (409); reserva que começa no dia do check-out anterior e mesmo período em quartos diferentes são aceitos.
@@ -346,6 +376,6 @@ Cobertura atual:
 ## Logs
 
 - `storage/logs/laravel.log`: eventos da API (reserva criada, reserva recusada por conflito de período ou por dailies que não cobrem a estadia, quartos criados, atualizados e removidos) e as exceções não tratadas.
-- `storage/logs/import-AAAA-MM-DD.log`: execuções do `xml:import` (avisos e falhas). Mantém os últimos 14 dias.
+- `storage/logs/import-AAAA-MM-DD.log`: avisos e falhas do `xml:import` (reservas ignoradas, dailies fora do período, arquivos ausentes e erros ao gravar). Mantém os últimos 14 dias.
 
 Os logs registram apenas ids e valores de negócio, nunca dados pessoais dos hóspedes.
